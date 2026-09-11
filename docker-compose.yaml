@@ -1,24 +1,81 @@
+version: '3.8'
+
 services:
-  node1:
-    build: ./nodes
-    container_name: storj-node1
+  # O Satellite age como o "Metadata server" e coordenador do sistema distribuído
+  satellite:
+    image: storjlabs/satellite:latest
+    container_name: storj-satellite
+    command: run
     ports:
-      - "5001:5000"
-    volumes:
-      - ./nodes/node1:/app/storage
+      - "10001:10001" 
+    environment:
+      - STORJ_SATELLITE_ADMIN_ADDRESS=0.0.0.0:10001
+    networks:
+      - storj-network
 
-  node2:
-    build: ./nodes
-    container_name: storj-node2
+  # Nó 1 de Armazenamento
+  storage-node-1:
+    image: storjlabs/storagenode:latest
+    container_name: storj-node-1
+    restart: unless-stopped
     ports:
-      - "5002:5000"
+      - "28967:28967" # Porta de dados interna
+      - "14002:14002" # Dashboard web do Nó 1
+    environment:
+      - ADDRESS=storage-node-1:28967
+      - SATELLITE_ADDRESS=satellite:10001
+      - STORAGE=2GB
     volumes:
-      - ./nodes/node2:/app/storage
+      - node1-data:/app/config
+    depends_on:
+      - satellite
+    networks:
+      - storj-network
 
-  node3:
-    build: ./nodes
-    container_name: storj-node3
+  # Nó 2 de Armazenamento
+  storage-node-2:
+    image: storjlabs/storagenode:latest
+    container_name: storj-node-2
+    restart: unless-stopped
     ports:
-      - "5003:5000"
+      - "28968:28967" # Mapeia porta externa 
+      - "14003:14002" # Dashboard web do Nó 2
+    environment:
+      - ADDRESS=storage-node-2:28967
+      - SATELLITE_ADDRESS=satellite:10001
+      - STORAGE=2GB
     volumes:
-      - ./nodes/node3:/app/storage
+      - node2-data:/app/config
+    depends_on:
+      - satellite
+    networks:
+      - storj-network
+
+  # Nó 3 de Armazenamento
+  storage-node-3:
+    image: storjlabs/storagenode:latest
+    container_name: storj-node-3
+    restart: unless-stopped
+    ports:
+      - "28969:28967" # Mapeia porta externa 
+      - "14004:14002" # Dashboard web do Nó 3
+    environment:
+      - ADDRESS=storage-node-3:28967
+      - SATELLITE_ADDRESS=satellite:10001
+      - STORAGE=2GB
+    volumes:
+      - node3-data:/app/config
+    depends_on:
+      - satellite
+    networks:
+      - storj-network
+
+
+volumes:
+  node1-data:
+  node2-data:
+  node3-data:
+
+networks:
+  storj-network:
+    driver: bridge
