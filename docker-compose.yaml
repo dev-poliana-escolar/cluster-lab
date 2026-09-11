@@ -1,0 +1,24 @@
+services:
+  node1:
+    build: ./nodes
+    container_name: storj-node1
+    ports:
+      - "5001:5000"
+    volumes:
+      - ./nodes/node1:/app/storage
+
+  node2:
+    build: ./nodes
+    container_name: storj-node2
+    ports:
+      - "5002:5000"
+    volumes:
+      - ./nodes/node2:/app/storage
+
+  node3:
+    build: ./nodes
+    container_name: storj-node3
+    ports:
+      - "5003:5000"
+    volumes:
+      - ./nodes/node3:/app/storage
