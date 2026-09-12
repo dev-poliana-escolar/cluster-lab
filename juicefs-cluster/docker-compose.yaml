@@ -1,0 +1,64 @@
+services:
+
+  redis:
+    image: redis:7-alpine
+    container_name: juicefs-redis
+    restart: unless-stopped
+    networks:
+      - juicefs
+
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: juicefs-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - ./data/minio:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - juicefs
+
+  node1:
+    image: juicefs/juicefs:latest
+    container_name: juicefs-node1
+    privileged: true
+    depends_on:
+      - redis
+      - minio
+    volumes:
+      - ./data/node1:/mnt/juicefs
+    networks:
+      - juicefs
+
+  node2:
+    image: juicefs/juicefs:latest
+    container_name: juicefs-node2
+    privileged: true
+    depends_on:
+      - redis
+      - minio
+    volumes:
+      - ./data/node2:/mnt/juicefs
+    networks:
+      - juicefs
+
+  node3:
+    image: juicefs/juicefs:latest
+    container_name: juicefs-node3
+    privileged: true
+    depends_on:
+      - redis
+      - minio
+    volumes:
+      - ./data/node3:/mnt/juicefs
+    networks:
+      - juicefs
+
+networks:
+  juicefs:
+    driver: bridge
