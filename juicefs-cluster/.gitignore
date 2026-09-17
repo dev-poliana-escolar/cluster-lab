@@ -1,1 +1,19 @@
+# Dados gerados pelo cluster
+data/redis
 data/minio
+data/node1/*
+data/node2/*
+data/node3/*
+
+# Python
+__pycache__/
+*.py[cod]
+
+
+# IDE
+.vscode/
+
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
