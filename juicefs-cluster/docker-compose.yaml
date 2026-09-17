@@ -1,9 +1,11 @@
 services:
-
   redis:
     image: redis:7-alpine
     container_name: juicefs-redis
     restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - ./data/redis:/data
     networks:
       - juicefs
 
@@ -24,38 +26,68 @@ services:
       - juicefs
 
   node1:
-    image: juicefs/juicefs:latest
+    image: juicedata/mount:ce-v1.3.1
     container_name: juicefs-node1
     privileged: true
+    restart: unless-stopped
     depends_on:
       - redis
       - minio
     volumes:
-      - ./data/node1:/mnt/juicefs
+      - type: bind
+        source: ./data/node1
+        target: /mnt/juicefs
+        bind:
+          propagation: shared
+    command: >
+      juicefs mount
+      redis://redis:6379/1
+      /mnt/juicefs
+      -f
     networks:
       - juicefs
 
   node2:
-    image: juicefs/juicefs:latest
+    image: juicedata/mount:ce-v1.3.1
     container_name: juicefs-node2
     privileged: true
+    restart: unless-stopped
     depends_on:
       - redis
       - minio
     volumes:
-      - ./data/node2:/mnt/juicefs
+      - type: bind
+        source: ./data/node2
+        target: /mnt/juicefs
+        bind:
+          propagation: shared
+    command: >
+      juicefs mount
+      redis://redis:6379/1
+      /mnt/juicefs
+      -f
     networks:
       - juicefs
 
   node3:
-    image: juicefs/juicefs:latest
+    image: juicedata/mount:ce-v1.3.1
     container_name: juicefs-node3
     privileged: true
+    restart: unless-stopped
     depends_on:
       - redis
       - minio
     volumes:
-      - ./data/node3:/mnt/juicefs
+      - type: bind
+        source: ./data/node3
+        target: /mnt/juicefs
+        bind:
+          propagation: shared
+    command: >
+      juicefs mount
+      redis://redis:6379/1
+      /mnt/juicefs
+      -f
     networks:
       - juicefs
 
