@@ -76,6 +76,12 @@
 
 4. Inicie os container dos nós:
     ```bash
+    sudo mkdir -p data/node1 data/node2 data/node3 #crie as pastas
+    ```
+
+    Depois:
+    ```
+    ```bash
     sudo docker compose up -d node1 node2 node3
     #ou
     sudo docker compose up -d
